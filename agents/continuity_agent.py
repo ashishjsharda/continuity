@@ -17,6 +17,8 @@ import os
 import sys
 from typing import Optional
 
+from pathlib import Path
+
 from dotenv import load_dotenv
 from google.adk.agents import LlmAgent
 from google.adk.tools.mcp_tool import McpToolset
@@ -28,6 +30,9 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 # ClickHouse MCP connection (official mcp-clickhouse)
 # ---------------------------------------------------------------------------
+
+_OPENSSL_LEGACY_CNF = Path(__file__).resolve().parent / "openssl_legacy.cnf"
+
 
 def build_clickhouse_mcp() -> McpToolset:
     """
@@ -43,6 +48,15 @@ def build_clickhouse_mcp() -> McpToolset:
         "CLICKHOUSE_DATABASE": os.getenv("CLICKHOUSE_DATABASE", "production_memory"),
         # Allow writes so the agent can leave audit records (demo mode)
         "CLICKHOUSE_ALLOW_WRITE_ACCESS": os.getenv("CLICKHOUSE_ALLOW_WRITE_ACCESS", "true"),
+        # OpenSSL 3.x refuses the legacy TLS renegotiation ClickHouse Cloud's
+        # edge still uses, causing SSLEOFError in this subprocess. Set before
+        # spawn so it's in effect at this process's first `ssl` import.
+        # See ClickHouse/ClickHouse#93304.
+        "OPENSSL_CONF": str(_OPENSSL_LEGACY_CNF),
+        # subprocess.Popen with a custom env replaces the environment
+        # wholesale, so carry PATH through or `python -m` may fail to
+        # resolve the interpreter's own stdlib/site-packages on some hosts.
+        "PATH": os.getenv("PATH", ""),
     }
 
     # Use the same Python that's running Streamlit.
