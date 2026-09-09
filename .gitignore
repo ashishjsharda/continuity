@@ -6,6 +6,7 @@ __pycache__/
 *.pyc
 .adk/
 .streamlit/secrets.toml
+.streamlit/secrets.toml.bak
 .idea/
 .vscode/
 *.log
