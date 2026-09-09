@@ -129,7 +129,7 @@ Speak like a seasoned script supervisor who also understands the budget.
 # ---------------------------------------------------------------------------
 
 root_agent = LlmAgent(
-    model="gemini-2.5-flash",          # fast + strong for tool use; swap to pro if needed
+    model="gemini-3.6-flash",          # fast + strong for tool use; swap to pro if needed
     name="continuity",
     description="Production Memory Agent that uses ClickHouse as long-term memory for film & TV productions.",
     instruction=SYSTEM_INSTRUCTION,
