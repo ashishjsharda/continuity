@@ -1,0 +1,15 @@
+.env
+.env.local
+.venv/
+venv/
+__pycache__/
+*.pyc
+.adk/
+.streamlit/secrets.toml
+.idea/
+.vscode/
+*.log
+.DS_Store
+dist/
+build/
+*.egg-info/
