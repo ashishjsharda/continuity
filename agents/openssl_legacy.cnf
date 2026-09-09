@@ -1,0 +1,20 @@
+# Re-enables legacy/unsafe TLS renegotiation, which ClickHouse Cloud's edge
+# TLS termination still relies on. OpenSSL 3.x refuses it by default,
+# causing SSLEOFError / UNEXPECTED_EOF_WHILE_READING against
+# *.clickhouse.cloud from modern (OpenSSL 3.x) containers.
+# See ClickHouse/ClickHouse#93304.
+#
+# Loaded via the OPENSSL_CONF env var set for the mcp-clickhouse subprocess
+# in agents/continuity_agent.py:build_clickhouse_mcp(). Must be set before
+# that process's first `ssl` import, which is guaranteed since we control
+# its environment from spawn.
+openssl_conf = openssl_init
+
+[openssl_init]
+ssl_conf = ssl_configuration
+
+[ssl_configuration]
+system_default = tls_system_default
+
+[tls_system_default]
+Options = UnsafeLegacyRenegotiation
