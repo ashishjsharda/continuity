@@ -80,6 +80,24 @@ def _secret_status(name: str) -> str:
     return "set" if os.getenv(name) else "MISSING"
 
 
+def _clickhouse_pool_manager():
+    """
+    ClickHouse Cloud's edge TLS termination relies on deprecated TLS
+    renegotiation, which OpenSSL 3.x refuses by default. Containers running
+    modern Python/OpenSSL (Streamlit Cloud included) get SSLEOFError /
+    UNEXPECTED_EOF_WHILE_READING as a result. Re-enabling
+    OP_LEGACY_SERVER_CONNECT on our own SSL context fixes it without
+    weakening cert verification. See ClickHouse/ClickHouse#93304.
+    """
+    import ssl
+    import urllib3
+
+    ctx = ssl.create_default_context()
+    if hasattr(ssl, "OP_LEGACY_SERVER_CONNECT"):
+        ctx.options |= ssl.OP_LEGACY_SERVER_CONNECT
+    return urllib3.PoolManager(ssl_context=ctx)
+
+
 def query_clickhouse(sql: str):
     import clickhouse_connect
 
@@ -89,6 +107,7 @@ def query_clickhouse(sql: str):
         username=os.getenv("CLICKHOUSE_USER", "default"),
         password=os.getenv("CLICKHOUSE_PASSWORD", ""),
         secure=os.getenv("CLICKHOUSE_SECURE", "true").lower() == "true",
+        pool_mgr=_clickhouse_pool_manager(),
     )
     return client.query(sql)
 
