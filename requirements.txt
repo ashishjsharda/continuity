@@ -1,4 +1,3 @@
-python-3.12
 google-adk>=1.0.0
 google-cloud-aiplatform[agent_engines,adk]>=1.101.0
 mcp-clickhouse>=0.4.0
