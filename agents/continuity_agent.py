@@ -14,6 +14,7 @@ for a media production. It can:
 from __future__ import annotations
 
 import os
+import sys
 from typing import Optional
 
 from dotenv import load_dotenv
@@ -44,14 +45,12 @@ def build_clickhouse_mcp() -> McpToolset:
         "CLICKHOUSE_ALLOW_WRITE_ACCESS": os.getenv("CLICKHOUSE_ALLOW_WRITE_ACCESS", "true"),
     }
 
+    # Use the same Python that's running Streamlit.
+    # Do NOT use `uv` — Streamlit Cloud / many hosts don't have it, and the
+    # app dies before binding :8501 (healthz connection refused).
     server_params = StdioServerParameters(
-        command="uv",
-        args=[
-            "run",
-            "--with", "mcp-clickhouse",
-            "--python", "3.12",
-            "mcp-clickhouse",
-        ],
+        command=sys.executable,
+        args=["-m", "mcp_clickhouse.main"],
         env=env,
     )
 
