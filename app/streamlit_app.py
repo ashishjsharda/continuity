@@ -181,7 +181,7 @@ def run_agent_sync(prompt: str) -> str:
             app_name="continuity",
             session_service=session_service,
         )
-        session = session_service.create_session(
+        session = session_service.create_session_sync(
             app_name="continuity",
             user_id="demo_user",
             session_id=str(uuid.uuid4()),
